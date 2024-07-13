@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+      body {
+        background-image: url('backgroud.png');
+        background-size: cover; /* Cover the entire viewport */
+        background-position: center; /* Center the image */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+    .game-container {
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+        width: 400px; /* Adjust width as needed */
+    }
+    .game-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    .instructions {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        color: red; /* Make text red */
+    }
+    .snake-image {
+        width: 300px; /* Increase width as desired */
+        height: auto;
+        margin-bottom: 20px;
+    }
+    canvas {
+        border: 1px solid #000;
+        background-color: #fff; /* White background for the canvas */
+    }
+    .exit-button {
+        position: absolute;
+        top: 10px; /* Adjust top position */
+        left: 10px; /* Adjust left position */
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    </style>
+</head>
+<body>
+    <button class="exit-button" onclick="goBack()">Exit Game</button>
+    <div class="game-container">
+        <img src="logo.png" alt="Snake Image" class="snake-image"> <!-- Replace Snake Image with your logo -->
+        <h1 class="game-title"></h1>
+        <p class="instructions">Use arrow keys to start the game and move the snake.</p>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    </div>
+
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const gridSize = 20;
+        const gridWidth = canvas.width / gridSize;
+        const gridHeight = canvas.height / gridSize;
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+
+        function drawSnake() {
+            snake.forEach(segment => {
+                ctx.fillStyle = "#000";
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function spawnFood() {
+            food.x = Math.floor(Math.random() * gridWidth);
+            food.y = Math.floor(Math.random() * gridHeight);
+        }
+
+        function checkCollision() {
+            if (snake[0].x < 0 || snake[0].x >= gridWidth || snake[0].y < 0 || snake[0].y >= gridHeight) {
+                return true; // wall collision
+            }
+
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+                    return true; // self collision
+                }
+            }
+
+            return false;
+        }
+
+        function main() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawSnake();
+            drawFood();
+            moveSnake();
+
+            if (checkCollision()) {
+                alert("Game Over! Your score is: " + score);
+                snake = [{ x: 10, y: 10 }];
+                dx = 0;
+                dy = 0;
+                score = 0;
+                spawnFood();
+            }
+
+            setTimeout(main, 100);
+        }
+
+        document.addEventListener("keydown", event => {
+            const keyPressed = event.key;
+
+            switch (keyPressed) {
+                case "ArrowUp":
+                    if (dy !== 1) {
+                        dx = 0;
+                        dy = -1;
+                    }
+                    break;
+                case "ArrowDown":
+                    if (dy !== -1) {
+                        dx = 0;
+                        dy = 1;
+                    }
+                    break;
+                case "ArrowLeft":
+                    if (dx !== 1) {
+                        dx = -1;
+                        dy = 0;
+                    }
+                    break;
+                case "ArrowRight":
+                    if (dx !== -1) {
+                        dx = 1;
+                        dy = 0;
+                    }
+                    break;
+            }
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+
+        spawnFood();
+        main();
+    </script>
+</body>
+</html>
